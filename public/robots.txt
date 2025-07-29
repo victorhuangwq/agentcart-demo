@@ -1,0 +1,9 @@
+User-agent: *
+Allow: /
+
+# Agent discovery endpoints
+Allow: /.well-known/agent.json
+Allow: /api/search
+Allow: /api/buy
+
+Sitemap: https://demo.agentcart.dev/sitemap.xml

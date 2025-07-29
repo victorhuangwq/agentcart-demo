@@ -1,0 +1,28 @@
+{
+  "store": "Hoodie Hut",
+  "currency": "USD",
+  "products": [
+    {
+      "sku": "HOODIE-BLACK",
+      "name": "Classic Black Hoodie",
+      "price": 25,
+      "description": "Comfortable cotton blend, perfect for coding"
+    },
+    {
+      "sku": "HOODIE-GRAY",
+      "name": "Tech Gray Hoodie",
+      "price": 30,
+      "description": "Premium fabric with tech pocket"
+    },
+    {
+      "sku": "HOODIE-NAVY",
+      "name": "Navy Developer Hoodie",  
+      "price": 35,
+      "description": "Extra cozy with embroidered logo"
+    }
+  ],
+  "endpoints": {
+    "search": "/search",
+    "buy": "/buy"
+  }
+}
