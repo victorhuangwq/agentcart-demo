@@ -19,12 +19,12 @@ describe('/.well-known/agent.json', () => {
     expect(agentData).toHaveProperty('store')
     expect(agentData).toHaveProperty('currency')
     expect(agentData).toHaveProperty('products')
-    expect(agentData).toHaveProperty('endpoints')
+    expect(agentData).toHaveProperty('api')
 
     expect(typeof agentData.store).toBe('string')
     expect(typeof agentData.currency).toBe('string')
     expect(Array.isArray(agentData.products)).toBe(true)
-    expect(typeof agentData.endpoints).toBe('object')
+    expect(typeof agentData.api).toBe('object')
   })
 
   it('should have correct store details', () => {
@@ -83,17 +83,19 @@ describe('/.well-known/agent.json', () => {
   })
 
   it('should have correct API endpoints', () => {
-    expect(agentData.endpoints).toHaveProperty('search')
-    expect(agentData.endpoints).toHaveProperty('buy')
+    expect(agentData.api.endpoints).toHaveProperty('search')
+    expect(agentData.api.endpoints).toHaveProperty('buy')
 
-    expect(agentData.endpoints.search).toBe('/search')
-    expect(agentData.endpoints.buy).toBe('/buy')
+    expect(agentData.api.endpoints.search.path).toBe('/search')
+    expect(agentData.api.endpoints.buy.path).toBe('/buy')
   })
 
   it('should have valid endpoint paths', () => {
-    Object.values(agentData.endpoints).forEach((endpoint: any) => {
-      expect(typeof endpoint).toBe('string')
-      expect(endpoint).toMatch(/^\//)
+    const endpoints = agentData.api.endpoints
+    Object.values(endpoints).forEach((endpoint: any) => {
+      expect(endpoint).toHaveProperty('path')
+      expect(typeof endpoint.path).toBe('string')
+      expect(endpoint.path).toMatch(/^\//)
     })
   })
 
@@ -143,9 +145,11 @@ describe('/.well-known/agent.json', () => {
           description: expect.any(String)
         })
       ]),
-      endpoints: expect.objectContaining({
-        search: expect.any(String),
-        buy: expect.any(String)
+      api: expect.objectContaining({
+        endpoints: expect.objectContaining({
+          search: expect.any(Object),
+          buy: expect.any(Object)
+        })
       })
     })
   })

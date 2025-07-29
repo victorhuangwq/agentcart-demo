@@ -1,5 +1,10 @@
 {
   "store": "Hoodie Hut",
+  "description": "AI-ready demo store. You can search and purchase products using the API endpoints below.",
+  "instructions": {
+    "quick_start": "To buy a product: 1) Search for it, 2) POST to /buy with sku, qty, and pay_token",
+    "example": "To buy a black hoodie: POST /buy with {\"sku\": \"HOODIE-BLACK\", \"qty\": 1, \"pay_token\": \"demo\"}"
+  },
   "currency": "USD",
   "products": [
     {
@@ -21,8 +26,31 @@
       "description": "Extra cozy with embroidered logo"
     }
   ],
-  "endpoints": {
-    "search": "/search",
-    "buy": "/buy"
+  "api": {
+    "base_url": "https://agentcart-demo-site.vercel.app",
+    "endpoints": {
+      "search": {
+        "path": "/search",
+        "method": "GET",
+        "description": "Search products",
+        "parameters": {
+          "q": "Search query (optional)",
+          "max_price": "Maximum price filter (optional)",
+          "min_price": "Minimum price filter (optional)"
+        },
+        "example": "GET /search?q=navy&max_price=40"
+      },
+      "buy": {
+        "path": "/buy",
+        "method": "POST",
+        "description": "Purchase a product",
+        "required_fields": {
+          "sku": "Product SKU (e.g., HOODIE-BLACK)",
+          "qty": "Quantity (number)",
+          "pay_token": "Payment token (use 'demo' for testing)"
+        },
+        "example": "POST /buy with {\"sku\": \"HOODIE-BLACK\", \"qty\": 1, \"pay_token\": \"demo\"}"
+      }
+    }
   }
 }

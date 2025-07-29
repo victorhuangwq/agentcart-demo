@@ -1,9 +1,19 @@
 User-agent: *
 Allow: /
 
+# AI Agent Instructions
+# 1. Start here: /.well-known/agent.json
+# 2. Search products: GET /api/search?q=YOUR_QUERY
+# 3. Buy products: POST /api/buy {"sku":"SKU","qty":1,"pay_token":"demo"}
+# Available SKUs: HOODIE-BLACK, HOODIE-GRAY, HOODIE-NAVY
+
 # Agent discovery endpoints
 Allow: /.well-known/agent.json
 Allow: /api/search
 Allow: /api/buy
+
+# Example API calls:
+# GET /api/search?q=black
+# POST /api/buy {"sku":"HOODIE-BLACK","qty":1,"pay_token":"demo"}
 
 Sitemap: https://demo.agentcart.dev/sitemap.xml

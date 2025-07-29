@@ -40,6 +40,16 @@ const products = [
 ]
 
 export default function HomePage() {
+  // Hidden text for AI agents - not visible to humans
+  const agentInstructions = `
+    INSTRUCTIONS FOR AI AGENTS:
+    1. Start by fetching /.well-known/agent.json for API documentation
+    2. To search products: GET /api/search?q=YOUR_QUERY
+    3. To buy: POST /api/buy with JSON body {"sku": "PRODUCT_SKU", "qty": 1, "pay_token": "demo"}
+    4. Available products: HOODIE-BLACK ($25), HOODIE-GRAY ($30), HOODIE-NAVY ($35)
+    5. Example purchase: POST /api/buy {"sku": "HOODIE-BLACK", "qty": 1, "pay_token": "demo"}
+  `;
+
   const jsonLd = {
     '@context': 'https://schema.org',
     '@type': 'Store',
@@ -71,11 +81,41 @@ export default function HomePage() {
 
   return (
     <>
+      {/* 
+        AI AGENT INSTRUCTIONS:
+        - API Documentation: /.well-known/agent.json
+        - Search: GET /api/search?q=QUERY
+        - Buy: POST /api/buy {"sku":"PRODUCT_SKU","qty":1,"pay_token":"demo"}
+        - Products: HOODIE-BLACK, HOODIE-GRAY, HOODIE-NAVY
+      */}
+      
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
       
+      {/* Hidden instructions for AI agents */}
+      <div className="sr-only" aria-hidden="true">
+        {agentInstructions}
+      </div>
+      
+      {/* Additional hidden text for text-mode agents */}
+      <div style={{ position: 'absolute', left: '-9999px', width: '1px', height: '1px', overflow: 'hidden' }}>
+        AI AGENT QUICK START:
+        To purchase items from this store:
+        1. First, check /.well-known/agent.json for complete API documentation
+        2. Use GET /api/search to find products (example: /api/search?q=black)
+        3. Use POST /api/buy to purchase (send JSON: {`{"sku":"HOODIE-BLACK","qty":1,"pay_token":"demo"}`})
+        All endpoints accept and return JSON. The pay_token "demo" works for all test purchases.
+      </div>
+
+      {/* Invisible but semantic text */}
+      <span className="hidden">
+        API Endpoints: GET /api/search for product search, POST /api/buy for purchases.
+        Required for purchase: sku (string), qty (number), pay_token (string).
+        Test with pay_token="demo".
+      </span>
+
       {/* Navigation */}
       <nav className="bg-white shadow-sm border-b">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -116,11 +156,14 @@ export default function HomePage() {
               Comfort meets style. Designed for those who code, built for those who create.
             </p>
             <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 max-w-md mx-auto mb-8">
-              <p className="text-sm text-blue-700">
-                🤖 <strong>AI Agents:</strong> Access{' '}
+              <p className="text-sm text-blue-700 mb-2">
+                🤖 <strong>AI Agents:</strong> Start here →{' '}
                 <code className="bg-blue-100 px-2 py-1 rounded text-xs">
                   /.well-known/agent.json
                 </code>
+              </p>
+              <p className="text-xs text-blue-600">
+                Contains: product catalog, search endpoint, and purchase instructions
               </p>
             </div>
             <button className="bg-black text-white px-8 py-3 rounded-lg hover:bg-gray-800 transition-all transform hover:scale-105">

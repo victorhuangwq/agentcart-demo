@@ -27,8 +27,8 @@ describe('Agent Integration Workflows', () => {
     it('should complete a full purchase workflow: discover → search → buy', async () => {
       // Step 1: Agent discovers available products
       expect(agentData.products).toHaveLength(3)
-      expect(agentData.endpoints).toHaveProperty('search')
-      expect(agentData.endpoints).toHaveProperty('buy')
+      expect(agentData.api.endpoints).toHaveProperty('search')
+      expect(agentData.api.endpoints).toHaveProperty('buy')
 
       // Step 2: Agent searches for a specific product
       const searchRequest = createGetRequest('http://localhost:3000/api/search?q=black')
