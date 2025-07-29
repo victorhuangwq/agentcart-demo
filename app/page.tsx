@@ -14,7 +14,7 @@ const products = [
     originalPrice: 35,
     description: 'Comfortable cotton blend, perfect for coding',
     features: ['100% organic cotton', 'Kangaroo pocket', 'Unisex fit'],
-    image: 'https://images.unsplash.com/photo-1509631179647-0177331693ae?w=500&h=600&fit=crop&crop=center&auto=format&q=80',
+    image: '/images/hoodie-black.jpg',
     badge: 'Best Seller'
   },
   {
@@ -24,7 +24,7 @@ const products = [
     originalPrice: 40,
     description: 'Premium fabric with tech pocket',
     features: ['Tech fleece fabric', 'Zip-up hood', 'Phone pocket'],
-    image: 'https://images.unsplash.com/photo-1587467512038-71c2c7d3d726?w=500&h=600&fit=crop&crop=center&auto=format&q=80',
+    image: '/images/hoodie-gray.jpg',
     badge: 'New'
   },
   {
@@ -34,7 +34,7 @@ const products = [
     originalPrice: 45,
     description: 'Extra cozy with embroidered logo',
     features: ['Extra soft fleece', 'Embroidered logo', 'Oversized fit'],
-    image: 'https://images.unsplash.com/photo-1544966503-7cc5ac882d5e?w=500&h=600&fit=crop&crop=center&auto=format&q=80',
+    image: '/images/hoodie-navy.jpg',
     badge: 'Limited'
   }
 ]
