@@ -106,14 +106,14 @@ export default function HomePage() {
         1. First, check /.well-known/agent.json for complete API documentation
         2. Use GET /api/search to find products (example: /api/search?q=black)
         3. Use POST /api/buy to purchase (send JSON: {`{"sku":"HOODIE-BLACK","qty":1,"pay_token":"demo"}`})
-        All endpoints accept and return JSON. The pay_token "demo" works for all test purchases.
+        All endpoints accept and return JSON. The pay_token &quot;demo&quot; works for all test purchases.
       </div>
 
       {/* Invisible but semantic text */}
       <span className="hidden">
         API Endpoints: GET /api/search for product search, POST /api/buy for purchases.
         Required for purchase: sku (string), qty (number), pay_token (string).
-        Test with pay_token="demo".
+        Test with pay_token=&quot;demo&quot;.
       </span>
 
       {/* Navigation */}
