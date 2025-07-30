@@ -1,65 +1,34 @@
 import type { Metadata } from 'next'
 import ProductImage from './components/ProductImage'
+import { PRODUCTS } from './lib/products'
 
 export const metadata: Metadata = {
-  title: 'Hoodie Hut - Premium Developer Hoodies',
-  description: 'Discover premium hoodies designed for developers. Comfort meets style.',
+  title: 'Creator Merch Store - Premium Hoodies, Hats & Shoes',
+  description: 'Official YouTube creator merchandise. Shop premium hoodies, hats, and limited edition sneakers.',
 }
-
-const products = [
-  {
-    sku: 'HOODIE-BLACK',
-    name: 'Classic Black Hoodie',
-    price: 25,
-    originalPrice: 35,
-    description: 'Comfortable cotton blend, perfect for coding',
-    features: ['100% organic cotton', 'Kangaroo pocket', 'Unisex fit'],
-    image: '/images/hoodie-black.jpg',
-    badge: 'Best Seller'
-  },
-  {
-    sku: 'HOODIE-GRAY', 
-    name: 'Tech Gray Hoodie',
-    price: 30,
-    originalPrice: 40,
-    description: 'Premium fabric with tech pocket',
-    features: ['Tech fleece fabric', 'Zip-up hood', 'Phone pocket'],
-    image: '/images/hoodie-gray.jpg',
-    badge: 'New'
-  },
-  {
-    sku: 'HOODIE-NAVY',
-    name: 'Navy Developer Hoodie',
-    price: 35,
-    originalPrice: 45,
-    description: 'Extra cozy with embroidered logo',
-    features: ['Extra soft fleece', 'Embroidered logo', 'Oversized fit'],
-    image: '/images/hoodie-navy.jpg',
-    badge: 'Limited'
-  }
-]
 
 export default function HomePage() {
   // Hidden text for AI agents - not visible to humans
   const agentInstructions = `
     INSTRUCTIONS FOR AI AGENTS:
-    1. Start by fetching /.well-known/agent.json for API documentation
-    2. To search products: GET /api/search?q=YOUR_QUERY
-    3. To buy: POST /api/buy with JSON body {"sku": "PRODUCT_SKU", "qty": 1, "pay_token": "demo"}
-    4. Available products: HOODIE-BLACK ($25), HOODIE-GRAY ($30), HOODIE-NAVY ($35)
-    5. Example purchase: POST /api/buy {"sku": "HOODIE-BLACK", "qty": 1, "pay_token": "demo"}
+    1. Start by fetching /.well-known/agent-store.json for complete API documentation
+    2. To search products: GET /api/search?q=YOUR_QUERY&category=CATEGORY&color=COLOR
+    3. To get product details: GET /api/product?sku=PRODUCT_SKU
+    4. To buy: POST /api/buy with JSON body {"sku": "PRODUCT_SKU", "qty": 1, "size": "SIZE", "pay_token": "demo"}
+    5. Categories available: hoodie, hat, shoes
+    6. Example purchase: POST /api/buy {"sku": "HOODIE-BLACK-001", "qty": 1, "size": "L", "pay_token": "demo"}
   `;
 
   const jsonLd = {
     '@context': 'https://schema.org',
     '@type': 'Store',
-    name: 'Hoodie Hut',
-    description: 'Premium developer hoodies',
+    name: 'Creator Merch Store',
+    description: 'Official YouTube creator merchandise store',
     url: 'https://demo.agentcart.dev',
     hasOfferCatalog: {
       '@type': 'OfferCatalog',
-      name: 'Hoodies',
-      itemListElement: products.map((product, index) => ({
+      name: 'Creator Merchandise',
+      itemListElement: PRODUCTS.map((product, index) => ({
         '@type': 'Offer',
         position: index + 1,
         itemOffered: {
@@ -83,10 +52,11 @@ export default function HomePage() {
     <>
       {/* 
         AI AGENT INSTRUCTIONS:
-        - API Documentation: /.well-known/agent.json
-        - Search: GET /api/search?q=QUERY
-        - Buy: POST /api/buy {"sku":"PRODUCT_SKU","qty":1,"pay_token":"demo"}
-        - Products: HOODIE-BLACK, HOODIE-GRAY, HOODIE-NAVY
+        - API Documentation: /.well-known/agent-store.json
+        - Search: GET /api/search?q=QUERY&category=CATEGORY
+        - Product Details: GET /api/product?sku=SKU
+        - Buy: POST /api/buy {"sku":"PRODUCT_SKU","qty":1,"size":"SIZE","pay_token":"demo"}
+        - Categories: hoodie, hat, shoes
       */}
       
       <script
@@ -103,16 +73,18 @@ export default function HomePage() {
       <div style={{ position: 'absolute', left: '-9999px', width: '1px', height: '1px', overflow: 'hidden' }}>
         AI AGENT QUICK START:
         To purchase items from this store:
-        1. First, check /.well-known/agent.json for complete API documentation
-        2. Use GET /api/search to find products (example: /api/search?q=black)
-        3. Use POST /api/buy to purchase (send JSON: {`{"sku":"HOODIE-BLACK","qty":1,"pay_token":"demo"}`})
+        1. First, check /.well-known/agent-store.json for complete API documentation
+        2. Use GET /api/search to find products (example: /api/search?category=hoodie&color=black)
+        3. Use GET /api/product?sku=SKU to check sizes and inventory
+        4. Use POST /api/buy to purchase (send JSON: {`{"sku":"HOODIE-BLACK-001","qty":1,"size":"L","pay_token":"demo"}`})
         All endpoints accept and return JSON. The pay_token &quot;demo&quot; works for all test purchases.
+        Products need size selection except hats (one size).
       </div>
 
       {/* Invisible but semantic text */}
       <span className="hidden">
-        API Endpoints: GET /api/search for product search, POST /api/buy for purchases.
-        Required for purchase: sku (string), qty (number), pay_token (string).
+        API Endpoints: GET /api/search for product search, GET /api/product for details, POST /api/buy for purchases.
+        Required for purchase: sku (string), qty (number), pay_token (string), size (string for sized items).
         Test with pay_token=&quot;demo&quot;.
       </span>
 
@@ -121,7 +93,7 @@ export default function HomePage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center">
-              <h1 className="text-2xl font-bold text-gray-900">Hoodie Hut</h1>
+              <h1 className="text-2xl font-bold text-gray-900">Creator Merch</h1>
             </div>
             <div className="hidden md:flex space-x-8">
               <a href="#" className="text-gray-700 hover:text-gray-900 transition-colors">Shop</a>
@@ -150,20 +122,20 @@ export default function HomePage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center">
             <h2 className="text-5xl font-bold text-gray-900 mb-6">
-              Premium Developer Hoodies
+              Official Creator Merchandise
             </h2>
             <p className="text-xl text-gray-600 mb-8 max-w-2xl mx-auto">
-              Comfort meets style. Designed for those who code, built for those who create.
+              Premium hoodies, exclusive hats, and limited edition sneakers for true fans.
             </p>
             <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 max-w-md mx-auto mb-8">
               <p className="text-sm text-blue-700 mb-2">
                 🤖 <strong>AI Agents:</strong> Start here →{' '}
                 <code className="bg-blue-100 px-2 py-1 rounded text-xs">
-                  /.well-known/agent.json
+                  /.well-known/agent-store.json
                 </code>
               </p>
               <p className="text-xs text-blue-600">
-                Contains: product catalog, search endpoint, and purchase instructions
+                Contains: full catalog, search filters, product details, and purchase API
               </p>
             </div>
             <button className="bg-black text-white px-8 py-3 rounded-lg hover:bg-gray-800 transition-all transform hover:scale-105">
@@ -177,13 +149,23 @@ export default function HomePage() {
       <main className="py-16 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
-            <h3 className="text-3xl font-bold text-gray-900 mb-4">Featured Collection</h3>
-            <p className="text-gray-600">Handpicked hoodies for the modern developer</p>
+            <h3 className="text-3xl font-bold text-gray-900 mb-4">Shop All Products</h3>
+            <p className="text-gray-600">Premium merch for the creator community</p>
+          </div>
+
+          {/* Category Tabs */}
+          <div className="flex justify-center mb-12">
+            <div className="bg-gray-100 rounded-lg p-1 inline-flex">
+              <button className="px-6 py-2 rounded-md bg-white shadow-sm text-gray-900 font-medium">All</button>
+              <button className="px-6 py-2 rounded-md text-gray-600 hover:text-gray-900">Hoodies</button>
+              <button className="px-6 py-2 rounded-md text-gray-600 hover:text-gray-900">Hats</button>
+              <button className="px-6 py-2 rounded-md text-gray-600 hover:text-gray-900">Shoes</button>
+            </div>
           </div>
 
           <section aria-label="Products">
             <div className="grid md:grid-cols-3 gap-8">
-              {products.map((product) => (
+              {PRODUCTS.map((product) => (
                 <article
                   key={product.sku}
                   className="group bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden border border-gray-100"
@@ -202,11 +184,11 @@ export default function HomePage() {
                     </div>
                     <div className="absolute top-4 left-4">
                       <span className={`px-3 py-1 text-xs font-medium rounded-full ${
-                        product.badge === 'Best Seller' ? 'bg-green-100 text-green-800' :
-                        product.badge === 'New' ? 'bg-blue-100 text-blue-800' :
+                        product.category === 'hoodie' ? 'bg-blue-100 text-blue-800' :
+                        product.category === 'hat' ? 'bg-green-100 text-green-800' :
                         'bg-purple-100 text-purple-800'
                       }`}>
-                        {product.badge}
+                        {product.category.charAt(0).toUpperCase() + product.category.slice(1)}
                       </span>
                     </div>
                     <button className="absolute top-4 right-4 w-10 h-10 bg-white rounded-full shadow-md flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
@@ -233,7 +215,7 @@ export default function HomePage() {
 
                     {/* Features */}
                     <ul className="text-xs text-gray-500 mb-4 space-y-1">
-                      {product.features.map((feature, index) => (
+                      {product.features?.slice(0, 3).map((feature, index) => (
                         <li key={index} className="flex items-center">
                           <svg className="w-3 h-3 text-green-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
                             <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
@@ -253,25 +235,29 @@ export default function HomePage() {
                         <span className="text-2xl font-bold text-gray-900" itemProp="price">
                           ${product.price}
                         </span>
-                        <span className="text-lg text-gray-500 line-through">
-                          ${product.originalPrice}
-                        </span>
                         <meta itemProp="priceCurrency" content="USD" />
                         <meta itemProp="availability" content="https://schema.org/InStock" />
                       </div>
-                      <div className="text-sm text-green-600 font-medium">
-                        Save ${product.originalPrice - product.price}
+                      <div className="text-sm text-gray-600">
+                        {product.color}
                       </div>
                     </div>
 
                     {/* Size Selection */}
                     <div className="mb-4">
-                      <p className="text-sm font-medium text-gray-900 mb-2">Size</p>
-                      <div className="flex space-x-2">
-                        {['XS', 'S', 'M', 'L', 'XL'].map((size) => (
+                      <p className="text-sm font-medium text-gray-900 mb-2">
+                        {product.sizes.length > 1 ? 'Size' : 'One Size'}
+                      </p>
+                      <div className="flex flex-wrap gap-2">
+                        {product.sizes.map((size) => (
                           <button
                             key={size}
-                            className="w-10 h-10 border border-gray-300 rounded-lg hover:border-gray-900 transition-colors text-sm font-medium"
+                            className={`${
+                              product.sizes.length === 1 
+                                ? 'px-3 py-1 bg-gray-100 text-gray-700 rounded-md text-sm'
+                                : 'w-10 h-10 border border-gray-300 rounded-lg hover:border-gray-900 transition-colors text-sm font-medium'
+                            }`}
+                            disabled={product.sizes.length === 1}
                           >
                             {size}
                           </button>
@@ -335,8 +321,8 @@ export default function HomePage() {
       <footer className="bg-gray-900 text-white py-12">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center">
-            <h5 className="text-2xl font-bold mb-4">Hoodie Hut</h5>
-            <p className="text-gray-400 mb-8">Premium hoodies for the modern developer</p>
+            <h5 className="text-2xl font-bold mb-4">Creator Merch</h5>
+            <p className="text-gray-400 mb-8">Official YouTube creator merchandise</p>
             <div className="flex justify-center space-x-6">
               <a href="#" className="text-gray-400 hover:text-white transition-colors">
                 <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
@@ -355,7 +341,7 @@ export default function HomePage() {
               </a>
             </div>
             <div className="mt-8 pt-8 border-t border-gray-800 text-sm text-gray-400">
-              <p>&copy; 2025 Hoodie Hut. All rights reserved.</p>
+              <p>&copy; 2025 Creator Merch. All rights reserved.</p>
             </div>
           </div>
         </div>

@@ -1,11 +1,11 @@
 import fs from 'fs'
 import path from 'path'
 
-describe('/.well-known/agent.json', () => {
+describe('/.well-known/agent-store.json', () => {
   let agentData: any
 
   beforeAll(() => {
-    const agentJsonPath = path.join(process.cwd(), 'public', '.well-known', 'agent.json')
+    const agentJsonPath = path.join(process.cwd(), 'public', '.well-known', 'agent-store.json')
     const agentJsonContent = fs.readFileSync(agentJsonPath, 'utf8')
     agentData = JSON.parse(agentJsonContent)
   })
@@ -20,25 +20,32 @@ describe('/.well-known/agent.json', () => {
     expect(agentData).toHaveProperty('currency')
     expect(agentData).toHaveProperty('products')
     expect(agentData).toHaveProperty('api')
+    expect(agentData).toHaveProperty('categories')
 
     expect(typeof agentData.store).toBe('string')
     expect(typeof agentData.currency).toBe('string')
     expect(Array.isArray(agentData.products)).toBe(true)
     expect(typeof agentData.api).toBe('object')
+    expect(Array.isArray(agentData.categories)).toBe(true)
   })
 
   it('should have correct store details', () => {
-    expect(agentData.store).toBe('Hoodie Hut')
+    expect(agentData.store).toBe('Creator Merch Store')
     expect(agentData.currency).toBe('USD')
+    expect(agentData.categories).toEqual(['hoodie', 'hat', 'shoes'])
   })
 
-  it('should have all three products', () => {
-    expect(agentData.products).toHaveLength(3)
+  it('should have all nine products', () => {
+    expect(agentData.products).toHaveLength(9)
     
-    const skus = agentData.products.map((p: any) => p.sku)
-    expect(skus).toContain('HOODIE-BLACK')
-    expect(skus).toContain('HOODIE-GRAY')
-    expect(skus).toContain('HOODIE-NAVY')
+    const categories = agentData.products.map((p: any) => p.category)
+    const hoodieCounts = categories.filter((c: string) => c === 'hoodie').length
+    const hatCounts = categories.filter((c: string) => c === 'hat').length
+    const shoesCounts = categories.filter((c: string) => c === 'shoes').length
+    
+    expect(hoodieCounts).toBe(3)
+    expect(hatCounts).toBe(3)
+    expect(shoesCounts).toBe(3)
   })
 
   it('should have properly structured product data', () => {
@@ -47,13 +54,18 @@ describe('/.well-known/agent.json', () => {
       expect(product).toHaveProperty('name')
       expect(product).toHaveProperty('price')
       expect(product).toHaveProperty('description')
+      expect(product).toHaveProperty('category')
+      expect(product).toHaveProperty('color')
+      expect(product).toHaveProperty('sizes')
 
       expect(typeof product.sku).toBe('string')
       expect(typeof product.name).toBe('string')
       expect(typeof product.price).toBe('number')
       expect(typeof product.description).toBe('string')
+      expect(typeof product.category).toBe('string')
+      expect(typeof product.color).toBe('string')
+      expect(Array.isArray(product.sizes)).toBe(true)
 
-      expect(product.sku).toMatch(/^HOODIE-/)
       expect(product.price).toBeGreaterThan(0)
       expect(product.name.length).toBeGreaterThan(0)
       expect(product.description.length).toBeGreaterThan(0)
@@ -61,33 +73,35 @@ describe('/.well-known/agent.json', () => {
   })
 
   it('should have correct product details', () => {
-    const blackHoodie = agentData.products.find((p: any) => p.sku === 'HOODIE-BLACK')
-    const grayHoodie = agentData.products.find((p: any) => p.sku === 'HOODIE-GRAY')
-    const navyHoodie = agentData.products.find((p: any) => p.sku === 'HOODIE-NAVY')
+    const blackHoodie = agentData.products.find((p: any) => p.sku === 'HOODIE-BLACK-001')
+    const snapback = agentData.products.find((p: any) => p.sku === 'HAT-BLACK-001')
+    const sneakers = agentData.products.find((p: any) => p.sku === 'SHOES-BLACK-001')
 
     expect(blackHoodie).toBeDefined()
-    expect(grayHoodie).toBeDefined()
-    expect(navyHoodie).toBeDefined()
+    expect(snapback).toBeDefined()
+    expect(sneakers).toBeDefined()
 
     expect(blackHoodie.name).toBe('Classic Black Hoodie')
-    expect(blackHoodie.price).toBe(25)
-    expect(blackHoodie.description).toContain('cotton blend')
+    expect(blackHoodie.price).toBe(45)
+    expect(blackHoodie.category).toBe('hoodie')
 
-    expect(grayHoodie.name).toBe('Tech Gray Hoodie')
-    expect(grayHoodie.price).toBe(30)
-    expect(grayHoodie.description).toContain('tech pocket')
+    expect(snapback.name).toBe('Signature Snapback')
+    expect(snapback.price).toBe(25)
+    expect(snapback.category).toBe('hat')
 
-    expect(navyHoodie.name).toBe('Navy Developer Hoodie')
-    expect(navyHoodie.price).toBe(35)
-    expect(navyHoodie.description).toContain('embroidered logo')
+    expect(sneakers.name).toBe('Creator Sneakers')
+    expect(sneakers.price).toBe(120)
+    expect(sneakers.category).toBe('shoes')
   })
 
   it('should have correct API endpoints', () => {
     expect(agentData.api.endpoints).toHaveProperty('search')
+    expect(agentData.api.endpoints).toHaveProperty('product')
     expect(agentData.api.endpoints).toHaveProperty('buy')
 
-    expect(agentData.api.endpoints.search.path).toBe('/search')
-    expect(agentData.api.endpoints.buy.path).toBe('/buy')
+    expect(agentData.api.endpoints.search.path).toBe('/api/search')
+    expect(agentData.api.endpoints.product.path).toBe('/api/product')
+    expect(agentData.api.endpoints.buy.path).toBe('/api/buy')
   })
 
   it('should have valid endpoint paths', () => {
@@ -95,23 +109,21 @@ describe('/.well-known/agent.json', () => {
     Object.values(endpoints).forEach((endpoint: any) => {
       expect(endpoint).toHaveProperty('path')
       expect(typeof endpoint.path).toBe('string')
-      expect(endpoint.path).toMatch(/^\//)
+      expect(endpoint.path).toMatch(/^\/api\//)
     })
   })
 
   it('should be consistent with API route implementations', () => {
-    // Verify that the products in agent.json match those in the API
-    const expectedProducts = [
-      { sku: 'HOODIE-BLACK', name: 'Classic Black Hoodie', price: 25 },
-      { sku: 'HOODIE-GRAY', name: 'Tech Gray Hoodie', price: 30 },
-      { sku: 'HOODIE-NAVY', name: 'Navy Developer Hoodie', price: 35 }
+    // Verify that the products in agent-store.json match those in the API
+    const expectedSKUs = [
+      'HOODIE-BLACK-001', 'HOODIE-GRAY-002', 'HOODIE-NAVY-003',
+      'HAT-BLACK-001', 'HAT-RED-002', 'HAT-WHITE-003',
+      'SHOES-BLACK-001', 'SHOES-WHITE-002', 'SHOES-RED-003'
     ]
 
-    expectedProducts.forEach((expected) => {
-      const found = agentData.products.find((p: any) => p.sku === expected.sku)
+    expectedSKUs.forEach((expectedSKU) => {
+      const found = agentData.products.find((p: any) => p.sku === expectedSKU)
       expect(found).toBeDefined()
-      expect(found.name).toBe(expected.name)
-      expect(found.price).toBe(expected.price)
     })
   })
 
@@ -123,7 +135,7 @@ describe('/.well-known/agent.json', () => {
 
   it('should be accessible as static file', () => {
     // Verify the file exists and can be served as static content
-    const agentJsonPath = path.join(process.cwd(), 'public', '.well-known', 'agent.json')
+    const agentJsonPath = path.join(process.cwd(), 'public', '.well-known', 'agent-store.json')
     expect(fs.existsSync(agentJsonPath)).toBe(true)
     
     // In production, this would be served by the web server
@@ -137,20 +149,60 @@ describe('/.well-known/agent.json', () => {
     expect(agentData).toMatchObject({
       store: expect.any(String),
       currency: expect.any(String),
+      categories: expect.arrayContaining([expect.any(String)]),
       products: expect.arrayContaining([
         expect.objectContaining({
           sku: expect.any(String),
           name: expect.any(String),
           price: expect.any(Number),
-          description: expect.any(String)
+          description: expect.any(String),
+          category: expect.any(String),
+          color: expect.any(String),
+          sizes: expect.any(Array)
         })
       ]),
       api: expect.objectContaining({
         endpoints: expect.objectContaining({
           search: expect.any(Object),
+          product: expect.any(Object),
           buy: expect.any(Object)
         })
       })
+    })
+  })
+
+  it('should have comprehensive API documentation', () => {
+    const { endpoints } = agentData.api
+    
+    // Check search endpoint
+    expect(endpoints.search).toMatchObject({
+      path: expect.any(String),
+      method: 'GET',
+      description: expect.any(String),
+      parameters: expect.any(Object),
+      response: expect.any(Object),
+      example: expect.any(String)
+    })
+
+    // Check product endpoint
+    expect(endpoints.product).toMatchObject({
+      path: expect.any(String),
+      method: 'GET',
+      description: expect.any(String),
+      parameters: expect.any(Object),
+      response: expect.any(Object),
+      example: expect.any(String)
+    })
+
+    // Check buy endpoint
+    expect(endpoints.buy).toMatchObject({
+      path: expect.any(String),
+      method: 'POST',
+      description: expect.any(String),
+      required_fields: expect.any(Object),
+      optional_fields: expect.any(Object),
+      response: expect.any(Object),
+      example: expect.any(String)
     })
   })
 })

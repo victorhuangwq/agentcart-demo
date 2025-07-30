@@ -1,0 +1,154 @@
+{
+  "store": "Creator Merch Store",
+  "description": "AI-ready YouTube creator merchandise store. Search and purchase hoodies, hats, and shoes using our API.",
+  "instructions": {
+    "quick_start": "To buy a product: 1) Search for products, 2) Get product details if needed, 3) POST to /buy with sku, qty, size, and pay_token",
+    "example": "To buy a black hoodie size L: POST /buy with {\"sku\": \"HOODIE-BLACK-001\", \"qty\": 1, \"size\": \"L\", \"pay_token\": \"demo\"}"
+  },
+  "currency": "USD",
+  "categories": ["hoodie", "hat", "shoes"],
+  "products": [
+    {
+      "sku": "HOODIE-BLACK-001",
+      "name": "Classic Black Hoodie",
+      "price": 45,
+      "description": "Premium cotton blend hoodie with embroidered logo",
+      "category": "hoodie",
+      "color": "black",
+      "sizes": ["S", "M", "L", "XL", "XXL"]
+    },
+    {
+      "sku": "HOODIE-GRAY-002",
+      "name": "Tech Gray Hoodie",
+      "price": 55,
+      "description": "Tech fleece hoodie with zippered pockets",
+      "category": "hoodie",
+      "color": "gray",
+      "sizes": ["S", "M", "L", "XL"]
+    },
+    {
+      "sku": "HOODIE-NAVY-003",
+      "name": "Navy Creator Hoodie",
+      "price": 50,
+      "description": "Limited edition creator series hoodie",
+      "category": "hoodie",
+      "color": "navy",
+      "sizes": ["M", "L", "XL"]
+    },
+    {
+      "sku": "HAT-BLACK-001",
+      "name": "Signature Snapback",
+      "price": 25,
+      "description": "Classic snapback with embroidered logo",
+      "category": "hat",
+      "color": "black",
+      "sizes": ["OS"]
+    },
+    {
+      "sku": "HAT-RED-002",
+      "name": "Creator Beanie",
+      "price": 20,
+      "description": "Warm knit beanie for cold days",
+      "category": "hat",
+      "color": "red",
+      "sizes": ["OS"]
+    },
+    {
+      "sku": "HAT-WHITE-003",
+      "name": "Dad Cap",
+      "price": 22,
+      "description": "Vintage-style dad cap with curved brim",
+      "category": "hat",
+      "color": "white",
+      "sizes": ["OS"]
+    },
+    {
+      "sku": "SHOES-BLACK-001",
+      "name": "Creator Sneakers",
+      "price": 120,
+      "description": "Limited edition signature sneakers",
+      "category": "shoes",
+      "color": "black",
+      "sizes": ["7", "8", "9", "10", "11", "12"]
+    },
+    {
+      "sku": "SHOES-WHITE-002",
+      "name": "Cloud Walker Sneakers",
+      "price": 95,
+      "description": "Ultra-comfortable everyday sneakers",
+      "category": "shoes",
+      "color": "white",
+      "sizes": ["6", "7", "8", "9", "10", "11"]
+    },
+    {
+      "sku": "SHOES-RED-003",
+      "name": "Studio High-Tops",
+      "price": 110,
+      "description": "High-top sneakers for creators",
+      "category": "shoes",
+      "color": "red",
+      "sizes": ["8", "9", "10", "11"]
+    }
+  ],
+  "api": {
+    "base_url": "https://agentcart-demo-site.vercel.app",
+    "endpoints": {
+      "search": {
+        "path": "/api/search",
+        "method": "GET",
+        "description": "Search products with filters",
+        "parameters": {
+          "q": "Search query (optional)",
+          "category": "Filter by category: hoodie, hat, shoes (optional)",
+          "color": "Filter by color (optional)",
+          "max_price": "Maximum price filter (optional)",
+          "min_price": "Minimum price filter (optional)"
+        },
+        "response": {
+          "success": "boolean",
+          "results": "array of products",
+          "count": "number of results"
+        },
+        "example": "GET /api/search?category=hoodie&color=black"
+      },
+      "product": {
+        "path": "/api/product",
+        "method": "GET",
+        "description": "Get individual product details including inventory",
+        "parameters": {
+          "sku": "Product SKU (required)"
+        },
+        "response": {
+          "success": "boolean",
+          "product": "product object with full details"
+        },
+        "example": "GET /api/product?sku=HOODIE-BLACK-001"
+      },
+      "buy": {
+        "path": "/api/buy",
+        "method": "POST",
+        "description": "Purchase a product",
+        "required_fields": {
+          "sku": "Product SKU (e.g., HOODIE-BLACK-001)",
+          "qty": "Quantity (number)",
+          "pay_token": "Payment token (use 'demo' for testing)"
+        },
+        "optional_fields": {
+          "size": "Product size (required for products with multiple sizes)",
+          "email": "Customer email for confirmation"
+        },
+        "response": {
+          "success": "boolean",
+          "order_id": "unique order identifier",
+          "delivery_date": "estimated delivery date",
+          "total_price": "total amount charged"
+        },
+        "example": "POST /api/buy with {\"sku\": \"SHOES-BLACK-001\", \"qty\": 1, \"size\": \"10\", \"pay_token\": \"demo\", \"email\": \"customer@example.com\"}"
+      }
+    },
+    "error_format": {
+      "success": false,
+      "error": "error message"
+    }
+  }
+}

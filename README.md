@@ -1,10 +1,10 @@
-# 🛒 AgentCart Demo Site
+# 🛒 AgentCart Demo Store - Creator Merch
 
-> **The future of e-commerce is here.** This isn't just another online store—it's what happens when you make your Shopify completely agent-ready. 🤖
+> **The future of e-commerce is here.** This isn't just another online store—it's what happens when you make a YouTube creator's merch store completely agent-ready. 🤖
 
 ## What You're Looking At
 
-This demo site is the **actual output** of the AgentCart platform. We took a regular e-commerce store and transformed it into something AI agents can actually use. No more abandoned carts. No more "I can browse but can't buy" frustration.
+This demo site is the **actual output** of the AgentCart platform. We transformed a creator merchandise store (hoodies, hats, limited edition sneakers) into something AI agents can actually shop from. No more abandoned carts. No more "I can browse but can't buy" frustration.
 
 **The magic?** Any AI agent can now:
 1. 🔍 **Discover** your products instantly
@@ -16,7 +16,7 @@ This demo site is the **actual output** of the AgentCart platform. We took a reg
 **For Humans:** [Visit the demo store](https://agentcart-demo-site.vercel.app) and browse like normal
 
 **For Agents:** Tell ChatGPT, Claude, or any AI agent:
-> *"Visit https://agentcart-demo-site.vercel.app and find me a navy hoodie under $40"*
+> *"Visit https://agentcart-demo-site.vercel.app and find me a black hoodie in size L"*
 
 Watch them actually complete the purchase. Mind = blown. 🤯
 
@@ -50,30 +50,37 @@ Want to build an agent that shops here? Here's everything you need:
 
 ### Discovery
 ```bash
-GET /.well-known/agent.json
-# Returns: store info, products, API endpoints
+GET /.well-known/agent-store.json
+# Returns: store info, 9 products (hoodies, hats, shoes), API endpoints
 ```
 
 ### Search Products
 ```bash
-GET /api/search?q=hoodie&max_price=35
-# Natural language + price filters
+GET /api/search?category=hoodie&color=black
+# Filter by category, color, price, or search query
+```
+
+### Get Product Details
+```bash
+GET /api/product?sku=HOODIE-BLACK-001
+# Returns: full product details including sizes and inventory
 ```
 
 ### Complete Purchase
 ```bash
 POST /api/buy
 {
-  "sku": "HOODIE-NAVY",
+  "sku": "HOODIE-BLACK-001",
   "qty": 1,
+  "size": "L",
   "pay_token": "demo"
 }
-# Returns: { "status": "success", "order_id": "ord_abc123" }
+# Returns: { "success": true, "order_id": "ord_abc123", "delivery_date": "..." }
 ```
 
 ## 🏗️ What Makes This Agent-Ready
 
-- ✅ **Agent Discovery** via `/.well-known/agent.json`
+- ✅ **Agent Discovery** via `/.well-known/agent-store.json`
 - ✅ **Semantic Search** with natural language
 - ✅ **One-Click Purchase** API (no cart complexity)
 - ✅ **Structured Data** (JSON-LD) for discoverability
@@ -91,7 +98,7 @@ This demo proves it works. Now imagine your entire Shopify catalog being this ac
 
 - **Framework**: Next.js 15 with Turbopack
 - **Styling**: Tailwind CSS 
-- **Testing**: Jest (60 tests, 100% API coverage)
+- **Testing**: Jest (86 tests, 100% API coverage)
 - **Deploy**: Vercel Edge Functions
 - **Standards**: MCP, OpenAPI, JSON-LD
 
@@ -104,7 +111,7 @@ npm test              # Run all tests
 npm run test:coverage # See the 100% API coverage
 ```
 
-**60 tests covering:**
+**86 tests covering:**
 - Unit tests for every endpoint
 - Integration tests for complete agent workflows  
 - Performance tests for concurrent purchases

@@ -25,7 +25,8 @@ describe('Agent Endpoint Performance', () => {
       const responseTime = endTime - startTime
 
       expect(response.status).toBe(200)
-      expect(data.results).toHaveLength(3)
+      expect(data.success).toBe(true)
+      expect(data.results).toHaveLength(9)
       expect(responseTime).toBeLessThan(100) // Should respond in under 100ms
     })
 
@@ -52,9 +53,9 @@ describe('Agent Endpoint Performance', () => {
     it('should perform filtering operations efficiently', async () => {
       const filterTests = [
         'http://localhost:3000/api/search?q=black',
-        'http://localhost:3000/api/search?max_price=30',
-        'http://localhost:3000/api/search?min_price=30',
-        'http://localhost:3000/api/search?q=tech&max_price=35',
+        'http://localhost:3000/api/search?max_price=50',
+        'http://localhost:3000/api/search?min_price=50',
+        'http://localhost:3000/api/search?q=hoodie&max_price=60',
       ]
 
       for (const testUrl of filterTests) {
@@ -72,8 +73,9 @@ describe('Agent Endpoint Performance', () => {
   describe('Buy API Performance', () => {
     it('should process purchase requests quickly', async () => {
       const requestBody = {
-        sku: 'HOODIE-BLACK',
+        sku: 'HOODIE-BLACK-001',
         qty: 1,
+        size: 'L',
         pay_token: 'performance-test'
       }
 
@@ -84,7 +86,7 @@ describe('Agent Endpoint Performance', () => {
       const responseTime = endTime - startTime
 
       expect(response.status).toBe(200)
-      expect(data.status).toBe('success')
+      expect(data.success).toBe(true)
       expect(responseTime).toBeLessThan(100) // Should process in under 100ms
     })
 
@@ -92,8 +94,9 @@ describe('Agent Endpoint Performance', () => {
       const concurrentPurchases = 5
       const requests = Array.from({ length: concurrentPurchases }, (_, i) => 
         buyPOST(createPostRequest({
-          sku: 'HOODIE-GRAY',
+          sku: 'HOODIE-GRAY-002',
           qty: 1,
+          size: 'M',
           pay_token: `concurrent-test-${i}`
         }))
       )
@@ -112,7 +115,7 @@ describe('Agent Endpoint Performance', () => {
       const orderIds = new Set()
       for (const response of responses) {
         const data = await response.json()
-        expect(data.status).toBe('success')
+        expect(data.success).toBe(true)
         orderIds.add(data.order_id)
       }
       expect(orderIds.size).toBe(concurrentPurchases)
@@ -129,12 +132,13 @@ describe('Agent Endpoint Performance', () => {
       
       for (let i = 0; i < numOrders; i++) {
         const response = await buyPOST(createPostRequest({
-          sku: 'HOODIE-NAVY',
+          sku: 'HOODIE-NAVY-003',
           qty: 1,
+          size: 'XL',
           pay_token: `id-test-${i}`
         }))
         const data = await response.json()
-        expect(data.status).toBe('success')
+        expect(data.success).toBe(true)
         orderIds.add(data.order_id)
       }
 
@@ -166,14 +170,17 @@ describe('Agent Endpoint Performance', () => {
     })
 
     it('should handle large quantity purchases efficiently', async () => {
-      const largeQuantities = [10, 50, 100, 500]
+      // Use smaller quantities that fit within inventory constraints
+      // HOODIE-BLACK-001 size L has 100 units in inventory
+      const largeQuantities = [10, 50, 90]
       
       for (const qty of largeQuantities) {
         const startTime = Date.now()
         
         const response = await buyPOST(createPostRequest({
-          sku: 'HOODIE-BLACK',
+          sku: 'HOODIE-BLACK-001',
           qty,
+          size: 'L',
           pay_token: `large-qty-test-${qty}`
         }))
         
@@ -191,9 +198,9 @@ describe('Agent Endpoint Performance', () => {
   describe('Error Handling Performance', () => {
     it('should handle invalid requests efficiently', async () => {
       const invalidRequests = [
-        { sku: 'INVALID', qty: 1, pay_token: 'test' },
-        { sku: 'HOODIE-BLACK', qty: 0, pay_token: 'test' },
-        { sku: 'HOODIE-BLACK', qty: 1 }, // missing pay_token
+        { sku: 'INVALID', qty: 1, size: 'M', pay_token: 'test' },
+        { sku: 'HOODIE-BLACK-001', qty: 0, size: 'M', pay_token: 'test' },
+        { sku: 'HOODIE-BLACK-001', qty: 1, size: 'M' }, // missing pay_token
       ]
 
       for (const requestBody of invalidRequests) {
@@ -210,7 +217,7 @@ describe('Agent Endpoint Performance', () => {
     it('should handle search queries with no results efficiently', async () => {
       const noResultQueries = [
         'http://localhost:3000/api/search?q=nonexistent',
-        'http://localhost:3000/api/search?max_price=1',
+        'http://localhost:3000/api/search?max_price=10',
         'http://localhost:3000/api/search?min_price=1000',
       ]
 
@@ -234,8 +241,8 @@ describe('Agent Endpoint Performance', () => {
       const searchPatterns = [
         '',  // All products
         '?q=hoodie',  // Text search
-        '?max_price=30',  // Price filter
-        '?q=tech&min_price=25&max_price=35',  // Combined filters
+        '?max_price=50',  // Price filter
+        '?q=sneakers&min_price=80&max_price=130',  // Combined filters
       ]
 
       const timings: number[] = []

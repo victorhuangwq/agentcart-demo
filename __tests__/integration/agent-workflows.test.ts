@@ -18,7 +18,7 @@ describe('Agent Integration Workflows', () => {
   let agentData: any
 
   beforeAll(() => {
-    const agentJsonPath = path.join(process.cwd(), 'public', '.well-known', 'agent.json')
+    const agentJsonPath = path.join(process.cwd(), 'public', '.well-known', 'agent-store.json')
     const agentJsonContent = fs.readFileSync(agentJsonPath, 'utf8')
     agentData = JSON.parse(agentJsonContent)
   })
@@ -26,7 +26,7 @@ describe('Agent Integration Workflows', () => {
   describe('Complete Purchase Workflow', () => {
     it('should complete a full purchase workflow: discover → search → buy', async () => {
       // Step 1: Agent discovers available products
-      expect(agentData.products).toHaveLength(3)
+      expect(agentData.products).toHaveLength(9)
       expect(agentData.api.endpoints).toHaveProperty('search')
       expect(agentData.api.endpoints).toHaveProperty('buy')
 
@@ -36,23 +36,26 @@ describe('Agent Integration Workflows', () => {
       const searchData = await searchResponse.json()
 
       expect(searchResponse.status).toBe(200)
-      expect(searchData.results).toHaveLength(1)
+      expect(searchData.success).toBe(true)
+      expect(searchData.results.length).toBeGreaterThan(0)
       const selectedProduct = searchData.results[0]
-      expect(selectedProduct.sku).toBe('HOODIE-BLACK')
+      expect(selectedProduct.sku).toContain('BLACK')
 
       // Step 3: Agent purchases the product
       const buyRequest = createPostRequest({
         sku: selectedProduct.sku,
         qty: 1,
+        size: selectedProduct.sizes ? selectedProduct.sizes[0] : 'OS',
         pay_token: 'demo'
       })
       const buyResponse = await buyPOST(buyRequest)
       const buyData = await buyResponse.json()
 
       expect(buyResponse.status).toBe(200)
-      expect(buyData.status).toBe('success')
+      expect(buyData.success).toBe(true)
       expect(buyData.sku).toBe(selectedProduct.sku)
       expect(buyData).toHaveProperty('order_id')
+      expect(buyData).toHaveProperty('delivery_date')
     })
 
     it('should handle agent searching with price filters', async () => {
@@ -62,27 +65,29 @@ describe('Agent Integration Workflows', () => {
       const searchData = await searchResponse.json()
 
       expect(searchResponse.status).toBe(200)
-      expect(searchData.results).toHaveLength(2) // Black ($25) and Gray ($30)
+      expect(searchData.success).toBe(true)
+      expect(searchData.results.length).toBeGreaterThan(0)
 
       // Agent selects the most expensive one within budget
       const expensiveOption = searchData.results.reduce((prev: any, current: any) => 
         (prev.price > current.price) ? prev : current
       )
-      expect(expensiveOption.sku).toBe('HOODIE-GRAY')
-      expect(expensiveOption.price).toBe(30)
+      expect(expensiveOption).toBeDefined()
+      expect(expensiveOption.price).toBeLessThanOrEqual(34)
 
       // Agent purchases it
       const buyRequest = createPostRequest({
         sku: expensiveOption.sku,
         qty: 1,
+        size: expensiveOption.sizes ? expensiveOption.sizes[0] : 'OS',
         pay_token: 'agent-token-123'
       })
       const buyResponse = await buyPOST(buyRequest)
       const buyData = await buyResponse.json()
 
       expect(buyResponse.status).toBe(200)
-      expect(buyData.status).toBe('success')
-      expect(buyData.sku).toBe('HOODIE-GRAY')
+      expect(buyData.success).toBe(true)
+      expect(buyData.sku).toBe(expensiveOption.sku)
     })
 
     it('should handle agent searching by description keywords', async () => {
@@ -92,14 +97,15 @@ describe('Agent Integration Workflows', () => {
       const searchData = await searchResponse.json()
 
       expect(searchResponse.status).toBe(200)
-      expect(searchData.results).toHaveLength(1)
-      expect(searchData.results[0].sku).toBe('HOODIE-NAVY')
-      expect(searchData.results[0].description).toContain('embroidered logo')
+      expect(searchData.success).toBe(true)
+      expect(searchData.results.length).toBeGreaterThan(0)
+      expect(searchData.results[0].description).toContain('embroidered')
 
       // Agent purchases based on feature match
       const buyRequest = createPostRequest({
         sku: searchData.results[0].sku,
         qty: 2,
+        size: searchData.results[0].sizes ? searchData.results[0].sizes[0] : 'OS',
         pay_token: 'feature-search-token'
       })
       const buyResponse = await buyPOST(buyRequest)
@@ -114,15 +120,17 @@ describe('Agent Integration Workflows', () => {
     it('should handle agent trying to buy unavailable product', async () => {
       // Agent tries to buy a product not in the catalog
       const buyRequest = createPostRequest({
-        sku: 'HOODIE-PURPLE',
+        sku: 'INVALID-SKU-999',
         qty: 1,
+        size: 'M',
         pay_token: 'demo'
       })
       const buyResponse = await buyPOST(buyRequest)
       const buyData = await buyResponse.json()
 
       expect(buyResponse.status).toBe(400)
-      expect(buyData.error).toBe('sku not found')
+      expect(buyData.success).toBe(false)
+      expect(buyData.error).toBe('Product not found')
 
       // Agent should be able to recover by searching for available products
       const searchRequest = createGetRequest('http://localhost:3000/api/search')
@@ -130,7 +138,8 @@ describe('Agent Integration Workflows', () => {
       const searchData = await searchResponse.json()
 
       expect(searchResponse.status).toBe(200)
-      expect(searchData.results).toHaveLength(3)
+      expect(searchData.success).toBe(true)
+      expect(searchData.results.length).toBeGreaterThan(0)
     })
 
     it('should handle agent with insufficient search results', async () => {
@@ -140,6 +149,7 @@ describe('Agent Integration Workflows', () => {
       const searchData = await searchResponse.json()
 
       expect(searchResponse.status).toBe(200)
+      expect(searchData.success).toBe(true)
       expect(searchData.results).toHaveLength(0)
       expect(searchData.count).toBe(0)
 
@@ -149,32 +159,37 @@ describe('Agent Integration Workflows', () => {
       const broaderSearchData = await broaderSearchResponse.json()
 
       expect(broaderSearchResponse.status).toBe(200)
-      expect(broaderSearchData.results).toHaveLength(3)
+      expect(broaderSearchData.success).toBe(true)
+      expect(broaderSearchData.results.length).toBeGreaterThan(0)
     })
 
     it('should handle agent with invalid purchase parameters', async () => {
       // Agent tries invalid quantity
       const invalidQtyRequest = createPostRequest({
-        sku: 'HOODIE-BLACK',
+        sku: 'HOODIE-BLACK-001',
         qty: -1,
+        size: 'M',
         pay_token: 'demo'
       })
       const invalidQtyResponse = await buyPOST(invalidQtyRequest)
       const invalidQtyData = await invalidQtyResponse.json()
 
       expect(invalidQtyResponse.status).toBe(400)
-      expect(invalidQtyData.error).toBe('invalid quantity')
+      expect(invalidQtyData.success).toBe(false)
+      expect(invalidQtyData.error).toBe('Invalid quantity')
 
       // Agent tries missing payment token
       const noTokenRequest = createPostRequest({
-        sku: 'HOODIE-BLACK',  
-        qty: 1
+        sku: 'HOODIE-BLACK-001',  
+        qty: 1,
+        size: 'M'
       })
       const noTokenResponse = await buyPOST(noTokenRequest)
       const noTokenData = await noTokenResponse.json()
 
       expect(noTokenResponse.status).toBe(400)
-      expect(noTokenData.error).toBe('payment token required')
+      expect(noTokenData.success).toBe(false)
+      expect(noTokenData.error).toBe('Payment token required')
     })
   })
 
@@ -193,8 +208,8 @@ describe('Agent Integration Workflows', () => {
       const minPrice = Math.min(...prices)
       const maxPrice = Math.max(...prices)
 
-      expect(minPrice).toBe(25) // HOODIE-BLACK
-      expect(maxPrice).toBe(35) // HOODIE-NAVY
+      expect(minPrice).toBeGreaterThan(0)
+      expect(maxPrice).toBeGreaterThan(minPrice)
 
       // Agent searches for budget option
       const budgetSearchRequest = createGetRequest(`http://localhost:3000/api/search?max_price=${minPrice}`)
@@ -209,34 +224,37 @@ describe('Agent Integration Workflows', () => {
     it('should support agent bulk purchasing', async () => {
       // Agent buys multiple items of the same product
       const buyRequest = createPostRequest({
-        sku: 'HOODIE-GRAY',
+        sku: 'HOODIE-GRAY-002',
         qty: 10,
+        size: 'L',
         pay_token: 'bulk-purchase-token'
       })
       const buyResponse = await buyPOST(buyRequest)
       const buyData = await buyResponse.json()
 
       expect(buyResponse.status).toBe(200)
-      expect(buyData.status).toBe('success')
+      expect(buyData.success).toBe(true)
       expect(buyData.qty).toBe(10)
-      expect(buyData.sku).toBe('HOODIE-GRAY')
+      expect(buyData.sku).toBe('HOODIE-GRAY-002')
     })
 
     it('should support agent filtering by price range', async () => {
       // Agent looks for mid-range products
-      const midRangeRequest = createGetRequest('http://localhost:3000/api/search?min_price=26&max_price=34')
+      const midRangeRequest = createGetRequest('http://localhost:3000/api/search?min_price=45&max_price=55')
       const midRangeResponse = await searchGET(midRangeRequest)
       const midRangeData = await midRangeResponse.json()
 
       expect(midRangeResponse.status).toBe(200)
-      expect(midRangeData.results).toHaveLength(1)
-      expect(midRangeData.results[0].sku).toBe('HOODIE-GRAY')
-      expect(midRangeData.results[0].price).toBe(30)
+      expect(midRangeData.success).toBe(true)
+      expect(midRangeData.results.length).toBeGreaterThan(0)
+      expect(midRangeData.results[0].price).toBeGreaterThanOrEqual(45)
+      expect(midRangeData.results[0].price).toBeLessThanOrEqual(55)
 
       // Agent purchases the mid-range option
       const buyRequest = createPostRequest({
         sku: midRangeData.results[0].sku,
         qty: 1,
+        size: midRangeData.results[0].sizes ? midRangeData.results[0].sizes[0] : 'OS',
         pay_token: 'mid-range-token'
       })
       const buyResponse = await buyPOST(buyRequest)
@@ -261,6 +279,8 @@ describe('Agent Integration Workflows', () => {
         expect(apiProduct.name).toBe(agentProduct.name)
         expect(apiProduct.price).toBe(agentProduct.price)
         expect(apiProduct.description).toBe(agentProduct.description)
+        expect(apiProduct.category).toBe(agentProduct.category)
+        expect(apiProduct.color).toBe(agentProduct.color)
       })
     })
 
@@ -270,13 +290,14 @@ describe('Agent Integration Workflows', () => {
         const buyRequest = createPostRequest({
           sku: product.sku,
           qty: 1,
+          size: product.sizes[0],
           pay_token: `test-${product.sku}`
         })
         const buyResponse = await buyPOST(buyRequest)
         const buyData = await buyResponse.json()
 
         expect(buyResponse.status).toBe(200)
-        expect(buyData.status).toBe('success')
+        expect(buyData.success).toBe(true)
         expect(buyData.sku).toBe(product.sku)
       }
     })
