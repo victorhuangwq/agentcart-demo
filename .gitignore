@@ -58,3 +58,5 @@ pids
 # temporary folders
 tmp/
 temp/
+
+claude.local.md
