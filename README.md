@@ -1,4 +1,4 @@
-# 🛒 AgentCart Demo Store - Creator Merch
+# 🛒 AgentCart Demo Store
 
 > **The future of e-commerce is here.** This isn't just another online store—it's what happens when you make a YouTube creator's merch store completely agent-ready. 🤖
 
